@@ -1,0 +1,1 @@
+# NFive Session Manager Plugin
