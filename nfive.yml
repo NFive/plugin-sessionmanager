@@ -5,6 +5,6 @@ author: NFive
 license: LGPL
 website: https://nfive.github.io/
 
-server: 
-  main: 
-    - NFive.SessionManager.net.dll
+server:
+  main:
+    - NFive.SessionManager
