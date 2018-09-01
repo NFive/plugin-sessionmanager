@@ -3,7 +3,7 @@ version: 0.1.0
 description: NFive session manager plugin
 author: NFive
 license: LGPL
-website: https://nfive.github.io/
+website: https://nfive.io/
 
 server:
   main:
