@@ -82,11 +82,24 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Deferals.cs" />
+    <Compile Include="Migrations\201809020003422_Init.cs" />
+    <Compile Include="Migrations\201809020003422_Init.Designer.cs">
+      <DependentUpon>201809020003422_Init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SessionController.cs" />
+    <Compile Include="Storage\StorageContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201809020003422_Init.resx">
+      <DependentUpon>201809020003422_Init.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
