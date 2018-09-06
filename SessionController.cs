@@ -95,7 +95,7 @@ namespace NFive.SessionManager
 			var deferals = new Deferals(callbacks, drop);
 
 			await this.Events.RaiseAsync("clientConnecting", client, deferals); // TODO
-		
+
 			using (var context = new StorageContext())
 			using (var transaction = context.Database.BeginTransaction())
 			{

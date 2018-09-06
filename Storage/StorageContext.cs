@@ -1,4 +1,4 @@
-﻿using System.Data.Entity;
+using System.Data.Entity;
 using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Server.Storage;
 
