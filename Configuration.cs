@@ -8,10 +8,10 @@ namespace NFive.SessionManager
 	[PublicAPI]
 	public class Configuration : IControllerConfiguration
 	{
-		private Lazy<int> maxClients = new Lazy<int>(() => API.GetConvarInt("sv_maxclients", 32));
+		private Lazy<ushort> maxClients = new Lazy<ushort>(() => (ushort)API.GetConvarInt("sv_maxclients", 32));
 
 		public uint ConnectionTimeout { get; set; } = 60000;
 		public uint ReconnectGrace { get; set; } = 120000;
-		public int MaxClients => this.maxClients.Value;
+		public ushort MaxClients => this.maxClients.Value;
 	}
 }
