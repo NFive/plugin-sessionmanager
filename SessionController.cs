@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
@@ -24,7 +24,6 @@ namespace NFive.SessionManager
 	public class SessionController : ConfigurableController<Configuration>
 	{
 		private readonly List<Action> sessionCallbacks = new List<Action>();
-		//private List<Session> sessions = new List<Session>();
 		private ConcurrentBag<Session> sessions = new ConcurrentBag<Session>();
 		private Dictionary<Session, Tuple<Task, CancellationTokenSource>> threads = new Dictionary<Session, Tuple<Task, CancellationTokenSource>>();
 
@@ -162,7 +161,8 @@ namespace NFive.SessionManager
 					{
 						Id = GuidGenerator.GenerateTimeBasedGuid(),
 						User = user,
-						IpAddress = client.EndPoint
+						IpAddress = client.EndPoint,
+						Created = DateTime.UtcNow
 					};
 
 					context.Sessions.Add(session);
@@ -181,15 +181,21 @@ namespace NFive.SessionManager
 
 			if (user == null || session == null) throw new Exception($"Failed to create session for {player.Name}");
 
-			if (this.sessions.Any(s => s.User.Id == user.Id)) this.Reconnecting(client, session);
+
 
 			this.sessions.Add(session);
 			var threadCancellationToken = new CancellationTokenSource();
-			this.threads.Add(
-				session,
-				new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorSession(session, client), threadCancellationToken.Token), threadCancellationToken)
+			lock (this.threads)
+			{
+				this.threads.Add(
+					session,
+					new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorSession(session, client), threadCancellationToken.Token), threadCancellationToken)
 				);
+			}
+
 			await this.Events.RaiseAsync("sessionCreated", client, session, deferrals);
+
+			if (this.sessions.Any(s => s.User.Id == user.Id && s.Id != session.Id)) this.Reconnecting(client, session);
 
 			await this.Events.RaiseAsync("clientConnected", client, session);
 			this.Logger.Info($"[{session.Id}] Player \"{user.Name}\" connected from {session.IpAddress}");
@@ -198,19 +204,24 @@ namespace NFive.SessionManager
 		public async void Reconnecting(Client client, Session session)
 		{
 			this.Logger.Debug($"Client reconnecting: {session.UserId}");
-			var oldSession = this.sessions.SingleOrDefault(s => s.User.Id == session.UserId);
+			var oldSession = this.sessions.OrderBy(s => s.Created).FirstOrDefault(s => s.User.Id == session.UserId);
 			if (oldSession == null) return;
-			var oldThread = this.threads.SingleOrDefault(t => t.Key.UserId == session.UserId).Key;
-			this.Logger.Debug($"Thread List: {string.Join(", ", this.threads.Select(t => t.Key.UserId))}");
+			await this.Events.RaiseAsync("clientReconnecting", client, session, oldSession);
+
+			var oldThread = this.threads.OrderBy(t => t.Key.Created).FirstOrDefault(t => t.Key.UserId == session.UserId).Key;
 			if (oldThread != null)
 			{
-				this.Logger.Debug($"Disposing of old thread: {oldThread.User.Name}");
-				this.threads[oldThread].Item2.Cancel();
-				this.threads[oldThread].Item1.Wait();
-				this.threads[oldThread].Item2.Dispose();
-				this.threads[oldThread].Item1.Dispose();
-				this.threads.Remove(oldThread);
+				lock (this.threads)
+				{
+					this.Logger.Debug($"Disposing of old thread: {oldThread.User.Name}");
+					this.threads[oldThread].Item2.Cancel();
+					this.threads[oldThread].Item1.Wait();
+					this.threads[oldThread].Item2.Dispose();
+					this.threads[oldThread].Item1.Dispose();
+					this.threads.Remove(oldThread);
+				}
 			}
+
 			this.sessions.TryTake(out oldSession);
 			await this.Events.RaiseAsync("clientReconnected", client, session, oldSession);
 		}
@@ -235,13 +246,34 @@ namespace NFive.SessionManager
 				var user = context.Users.SingleOrDefault(u => u.SteamId == client.SteamId);
 				if (user == null) throw new Exception($"No user to end for disconnected client \"{client.SteamId}\""); // TODO: SessionException
 
-				var session = context.Sessions.OrderBy(s => s.Connected).FirstOrDefault(s => s.User.Id == user.Id && s.Disconnected == null && s.DisconnectReason == null);
+				var session = context.Sessions.OrderBy(s => s.Created).FirstOrDefault(s => s.User.Id == user.Id && s.Disconnected == null && s.DisconnectReason == null);
 				if (session == null) throw new Exception($"No session to end for disconnected user \"{user.Id}\""); // TODO: SessionException
 
 				session.Disconnected = DateTime.UtcNow;
 				session.DisconnectReason = disconnectMessage;
 
 				await context.SaveChangesAsync();
+
+				var oldThread = this.threads.SingleOrDefault(t => t.Key.UserId == session.UserId).Key;
+				if (oldThread != null)
+				{
+					lock (this.threads)
+					{
+						this.threads[oldThread].Item2.Cancel();
+						this.threads[oldThread].Item1.Wait();
+						this.threads[oldThread].Item2.Dispose();
+						this.threads[oldThread].Item1.Dispose();
+						this.threads.Remove(oldThread);
+					}
+				}
+				var threadCancellationToken = new CancellationTokenSource();
+				lock (this.threads)
+				{
+					this.threads.Add(
+						session,
+						new Tuple<Task, CancellationTokenSource>(Task.Factory.StartNew(() => MonitorSession(session, client), threadCancellationToken.Token), threadCancellationToken)
+					);
+				}
 
 				await this.Events.RaiseAsync("clientDisconnected", client, session);
 
