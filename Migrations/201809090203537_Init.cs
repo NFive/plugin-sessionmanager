@@ -13,7 +13,8 @@ namespace NFive.SessionManager.Migrations
                     {
                         Id = c.Guid(nullable: false),
                         IpAddress = c.String(nullable: false, maxLength: 15, unicode: false),
-                        Connected = c.DateTime(nullable: false, precision: 0),
+                        Created = c.DateTime(nullable: false, precision: 0),
+                        Connected = c.DateTime(precision: 0),
                         Disconnected = c.DateTime(precision: 0),
                         DisconnectReason = c.String(maxLength: 200, unicode: false),
                         UserId = c.Guid(nullable: false),
@@ -21,7 +22,6 @@ namespace NFive.SessionManager.Migrations
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
                 .Index(t => t.UserId);
-            
         }
         
         public override void Down()
