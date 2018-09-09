@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
@@ -43,6 +43,10 @@ namespace NFive.SessionManager
 			this.Rpc.Event("playerDropped").OnRaw(new Action<Player, string, CallbackDelegate>(Dropped));
 			this.Rpc.Event("clientInitialize").On<string>(Initialize);
 			this.Rpc.Event("clientInitialized").On(Initialized);
+
+			this.Events.OnRequest("maxPlayers", () => this.Configuration.MaxClients);
+			this.Events.OnRequest("currentSessionsCount", () => this.sessions.Count);
+			this.Events.OnRequest("currentSessions", () => this.sessions.ToList());
 		}
 
 		private void OnSeverInitialized()
@@ -247,14 +251,28 @@ namespace NFive.SessionManager
 
 		public async void Initialize(IRpcEvent e, string clientVersion)
 		{
-			await this.Events.RaiseAsync("clientInitializing", e.Client);
+			var client = new Client(e.Client.Handle);
+
+			await this.Events.RaiseAsync("clientInitializing", client);
 
 			e.Reply(e.User);
 		}
 
-		public void Initialized(IRpcEvent e)
+		public async void Initialized(IRpcEvent e)
 		{
-			this.Events.Raise("clientInitialized", e.Client);
+			this.Logger.Debug($"Client Initialized: {e.Client.Name}");
+			var client = new Client(e.Client.Handle);
+			var session = this.sessions.Single(s => s.User.Id == e.User.Id);
+			using (var context = new StorageContext())
+			using (var transaction = context.Database.BeginTransaction())
+			{
+				session.Connected = DateTime.UtcNow;
+				context.Sessions.AddOrUpdate(session);
+				await context.SaveChangesAsync();
+				transaction.Commit();
+			}
+
+			this.Events.Raise("clientInitialized", client, session);
 		}
 
 		public async Task MonitorSession(Session session, Client client)
