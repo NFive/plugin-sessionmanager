@@ -20,6 +20,4 @@ namespace NFive.SessionManager
 			this.Drop = drop;
 		}
 	}
-
-	
 }

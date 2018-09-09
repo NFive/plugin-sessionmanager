@@ -16,7 +16,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>.\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>.\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -67,15 +67,17 @@
     </Reference>
     <Reference Include="NFive.SDK.Core.net, Version=0.1.0.10, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\NFive.SDK.Core.0.1.0.10\lib\net452\NFive.SDK.Core.net.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="NFive.SDK.Server.net, Version=0.1.0.8, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\NFive.SDK.Server.0.1.0.8\lib\net452\NFive.SDK.Server.net.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
-    <Compile Include="Deferals.cs" />
+    <Compile Include="Deferrals.cs" />
     <Compile Include="Migrations\201809090203537_Init.cs" />
     <Compile Include="Migrations\201809090203537_Init.Designer.cs">
       <DependentUpon>201809090203537_Init.cs</DependentUpon>
@@ -87,16 +89,8 @@
     <Compile Include="Storage\StorageContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="nfive.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="nfive.yml" />
     <None Include="packages.config" />
-    <None Include="README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201809090203537_Init.resx">

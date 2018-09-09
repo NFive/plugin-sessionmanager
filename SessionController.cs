@@ -181,8 +181,6 @@ namespace NFive.SessionManager
 
 			if (user == null || session == null) throw new Exception($"Failed to create session for {player.Name}");
 
-
-
 			this.sessions.Add(session);
 			var threadCancellationToken = new CancellationTokenSource();
 			lock (this.threads)

@@ -4,7 +4,6 @@ description: NFive session manager plugin
 author: NFive
 license: LGPL
 website: https://nfive.io/
-
 server:
   main:
     - NFive.SessionManager
