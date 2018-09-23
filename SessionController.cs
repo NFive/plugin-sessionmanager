@@ -50,14 +50,16 @@ namespace NFive.SessionManager
 
 		private void OnSeverInitialized()
 		{
+			var lastActive = this.Events.Request<DateTime>("lastServerActiveTime");
 			using (var context = new StorageContext())
 			using (var transaction = context.Database.BeginTransaction())
 			{
+				lastActive = lastActive == default(DateTime) ? DateTime.UtcNow : lastActive;
 				var disconnectedSessions = context.Sessions.Where(s => s.Disconnected == null).ToList();
 				foreach (Session disconnectedSession in disconnectedSessions)
 				{
-					disconnectedSession.Disconnected = DateTime.UtcNow;
-					disconnectedSession.DisconnectReason = "Session killed, disconnect time set to server boot";
+					disconnectedSession.Disconnected = lastActive;
+					disconnectedSession.DisconnectReason = "Session killed, disconnect time set to last server active time";
 					context.Sessions.AddOrUpdate(disconnectedSession);
 				}
 
