@@ -135,7 +135,7 @@ namespace NFive.SessionManager
 
 				try
 				{
-					user = context.Users.SingleOrDefault(u => u.SteamId == client.SteamId);
+					user = context.Users.SingleOrDefault(u => u.License == client.License);
 
 					if (user == default(User))
 					{
@@ -144,6 +144,7 @@ namespace NFive.SessionManager
 						user = new User
 						{
 							Id = GuidGenerator.GenerateTimeBasedGuid(),
+							License = client.License,
 							SteamId = client.SteamId,
 							Name = client.Name
 						};
@@ -243,8 +244,8 @@ namespace NFive.SessionManager
 			{
 				context.Configuration.LazyLoadingEnabled = false;
 
-				var user = context.Users.SingleOrDefault(u => u.SteamId == client.SteamId);
-				if (user == null) throw new Exception($"No user to end for disconnected client \"{client.SteamId}\""); // TODO: SessionException
+				var user = context.Users.SingleOrDefault(u => u.License == client.License);
+				if (user == null) throw new Exception($"No user to end for disconnected client \"{client.License}\""); // TODO: SessionException
 
 				var session = context.Sessions.OrderBy(s => s.Created).FirstOrDefault(s => s.User.Id == user.Id && s.Disconnected == null && s.DisconnectReason == null);
 				if (session == null) throw new Exception($"No session to end for disconnected user \"{user.Id}\""); // TODO: SessionException
