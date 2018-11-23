@@ -27,7 +27,7 @@ namespace NFive.SessionManager.Models
 
 			this.Name = player.Name;
 			this.License = player.Identifiers["license"];
-			this.SteamId = player.Identifiers.Contains("steam") ? long.Parse(player.Identifiers["steam"], NumberStyles.HexNumber) : default(long?);
+			this.SteamId = !string.IsNullOrEmpty(player.Identifiers["steam"]) ? long.Parse(player.Identifiers["steam"], NumberStyles.HexNumber) : default(long?);
 			this.EndPoint = player.EndPoint;
 			this.Ping = player.Ping;
 		}

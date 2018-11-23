@@ -154,8 +154,9 @@ namespace NFive.SessionManager
 					}
 					else
 					{
-						// Update name
+						// Update details
 						user.Name = client.Name;
+						if (client.SteamId.HasValue) user.SteamId = client.SteamId;
 					}
 
 					await this.Events.RaiseAsync("sessionCreating", client);
