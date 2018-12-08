@@ -12,6 +12,7 @@ using JetBrains.Annotations;
 using NFive.SDK.Core.Diagnostics;
 using NFive.SDK.Core.Helpers;
 using NFive.SDK.Core.Models.Player;
+using NFive.SDK.Core.Rpc;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
 using NFive.SDK.Server.Rpc;
@@ -33,24 +34,25 @@ namespace NFive.SessionManager
 		{
 			API.EnableEnhancedHostSupport(true);
 
-			this.Events.On("serverInitialized", OnSeverInitialized);
+			this.Events.On(ServerEvents.ServerInitialized, OnSeverInitialized);
 
 			this.Rpc.Event("hostingSession").OnRaw(new Action<Player>(OnHostingSession));
 			this.Rpc.Event("HostedSession").OnRaw(new Action<Player>(OnHostedSession));
-
 			this.Rpc.Event("playerConnecting").OnRaw(new Action<Player, string, CallbackDelegate, ExpandoObject>(Connecting));
 			this.Rpc.Event("playerDropped").OnRaw(new Action<Player, string, CallbackDelegate>(Dropped));
-			this.Rpc.Event("clientInitialize").On<string>(Initialize);
-			this.Rpc.Event("clientInitialized").On(Initialized);
 
-			this.Events.OnRequest("maxPlayers", () => this.Configuration.MaxClients);
-			this.Events.OnRequest("currentSessionsCount", () => this.sessions.Count);
-			this.Events.OnRequest("currentSessions", () => this.sessions.ToList());
+			this.Rpc.Event(RpcEvents.ClientInitialize).On<string>(Initialize);
+			this.Rpc.Event(RpcEvents.ClientInitialized).On(Initialized);
+			this.Rpc.Event(SessionEvents.DisconnectPlayer);
+
+			this.Events.OnRequest(SessionEvents.GetMaxPlayers, () => this.Configuration.MaxClients);
+			this.Events.OnRequest(SessionEvents.GetCurrentSessionsCount, () => this.sessions.Count);
+			this.Events.OnRequest(SessionEvents.GetCurrentSessions, () => this.sessions.ToList());
 		}
 
 		private void OnSeverInitialized()
 		{
-			var lastActive = this.Events.Request<DateTime>("lastServerActiveTime");
+			var lastActive = this.Events.Request<DateTime>(BootEvents.GetLastActiveTime);
 			using (var context = new StorageContext())
 			using (var transaction = context.Database.BeginTransaction())
 			{
@@ -125,7 +127,7 @@ namespace NFive.SessionManager
 			Session session = null;
 			User user = null;
 
-			await this.Events.RaiseAsync("clientConnecting", client, deferrals);
+			await this.Events.RaiseAsync(SessionEvents.ClientConnecting, client, deferrals);
 
 			using (var context = new StorageContext())
 			using (var transaction = context.Database.BeginTransaction())
@@ -139,7 +141,7 @@ namespace NFive.SessionManager
 
 					if (user == default(User))
 					{
-						await this.Events.RaiseAsync("userCreating", client);
+						await this.Events.RaiseAsync(SessionEvents.UserCreating, client);
 						// Create user
 						user = new User
 						{
@@ -150,7 +152,7 @@ namespace NFive.SessionManager
 						};
 
 						context.Users.Add(user);
-						await this.Events.RaiseAsync("userCreated", client, user);
+						await this.Events.RaiseAsync(SessionEvents.UserCreated, client, user);
 					}
 					else
 					{
@@ -159,7 +161,7 @@ namespace NFive.SessionManager
 						if (client.SteamId.HasValue) user.SteamId = client.SteamId;
 					}
 
-					await this.Events.RaiseAsync("sessionCreating", client);
+					await this.Events.RaiseAsync(SessionEvents.SessionCreating, client);
 					// Create session
 					session = new Session
 					{
@@ -195,11 +197,11 @@ namespace NFive.SessionManager
 				);
 			}
 
-			await this.Events.RaiseAsync("sessionCreated", client, session, deferrals);
+			await this.Events.RaiseAsync(SessionEvents.SessionCreated, client, session, deferrals);
 
 			if (this.sessions.Any(s => s.User.Id == user.Id && s.Id != session.Id)) this.Reconnecting(client, session);
 
-			await this.Events.RaiseAsync("clientConnected", client, session);
+			await this.Events.RaiseAsync(SessionEvents.ClientConnected, client, session);
 			this.Logger.Info($"[{session.Id}] Player \"{user.Name}\" connected from {session.IpAddress}");
 		}
 
@@ -208,7 +210,7 @@ namespace NFive.SessionManager
 			this.Logger.Debug($"Client reconnecting: {session.UserId}");
 			var oldSession = this.sessions.OrderBy(s => s.Created).FirstOrDefault(s => s.User.Id == session.UserId);
 			if (oldSession == null) return;
-			await this.Events.RaiseAsync("clientReconnecting", client, session, oldSession);
+			await this.Events.RaiseAsync(SessionEvents.ClientReconnecting, client, session, oldSession);
 
 			var oldThread = this.threads.OrderBy(t => t.Key.Created).FirstOrDefault(t => t.Key.UserId == session.UserId).Key;
 			if (oldThread != null)
@@ -225,7 +227,7 @@ namespace NFive.SessionManager
 			}
 
 			this.sessions.TryTake(out oldSession);
-			await this.Events.RaiseAsync("clientReconnected", client, session, oldSession);
+			await this.Events.RaiseAsync(SessionEvents.ClientReconnected, client, session, oldSession);
 		}
 
 		public async void Dropped([FromSource] Player player, string disconnectMessage, CallbackDelegate drop)
@@ -239,7 +241,7 @@ namespace NFive.SessionManager
 
 		public async void Disconnecting(Client client, string disconnectMessage)
 		{
-			await this.Events.RaiseAsync("clientDisconnecting", client);
+			await this.Events.RaiseAsync(SessionEvents.ClientDisconnecting, client);
 
 			using (var context = new StorageContext())
 			{
@@ -277,7 +279,7 @@ namespace NFive.SessionManager
 					);
 				}
 
-				await this.Events.RaiseAsync("clientDisconnected", client, session);
+				await this.Events.RaiseAsync(SessionEvents.ClientDisconnected, client, session);
 
 				this.Logger.Info($"[{session.Id}] Player \"{user.Name}\" disconnected: {session.DisconnectReason}");
 			}
@@ -287,7 +289,7 @@ namespace NFive.SessionManager
 		{
 			var client = new Client(e.Client.Handle);
 
-			await this.Events.RaiseAsync("clientInitializing", client);
+			await this.Events.RaiseAsync(SessionEvents.ClientInitializing, client);
 
 			e.Reply(e.User);
 		}
@@ -306,7 +308,7 @@ namespace NFive.SessionManager
 				transaction.Commit();
 			}
 
-			this.Events.Raise("clientInitialized", client, session);
+			this.Events.Raise(SessionEvents.ClientInitialized, client, session);
 		}
 
 		public async Task MonitorSession(Session session, Client client)
