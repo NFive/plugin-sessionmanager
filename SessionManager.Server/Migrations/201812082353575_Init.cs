@@ -1,4 +1,4 @@
-namespace NFive.SessionManager.Migrations
+namespace NFive.SessionManager.Server.Migrations
 {
     using System;
     using System.Data.Entity.Migrations;
@@ -22,6 +22,7 @@ namespace NFive.SessionManager.Migrations
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
                 .Index(t => t.UserId);
+            
         }
         
         public override void Down()

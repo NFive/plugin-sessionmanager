@@ -1,4 +1,4 @@
-﻿namespace NFive.SessionManager
+﻿namespace NFive.SessionManager.Shared
 {
 	public static class SessionEvents
 	{

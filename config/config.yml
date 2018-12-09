@@ -1,2 +1,0 @@
-connection_timeout: 60000
-reconnect_grace: 120000

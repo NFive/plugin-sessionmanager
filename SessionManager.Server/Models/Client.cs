@@ -1,9 +1,7 @@
 ﻿using System.Globalization;
-using System.Linq;
-using CitizenFX.Core;
 using NFive.SDK.Server.Rpc;
 
-namespace NFive.SessionManager.Models
+namespace NFive.SessionManager.Server.Models
 {
 	public class Client : IClient
 	{

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using CitizenFX.Core.Native;
 using JetBrains.Annotations;
 using NFive.SDK.Core.Controllers;
 
-namespace NFive.SessionManager
+namespace NFive.SessionManager.Server
 {
 	[PublicAPI]
 	public class Configuration : ControllerConfiguration

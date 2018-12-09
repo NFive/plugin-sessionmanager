@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
@@ -16,13 +16,14 @@ using NFive.SDK.Core.Rpc;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
 using NFive.SDK.Server.Rpc;
-using NFive.SessionManager.Storage;
-using NFive.SessionManager.Models;
+using NFive.SessionManager.Server.Models;
+using NFive.SessionManager.Server.Storage;
+using NFive.SessionManager.Shared;
 
-namespace NFive.SessionManager
+namespace NFive.SessionManager.Server
 {
 	[PublicAPI]
-	public class SessionController : ConfigurableController<Configuration>
+	public class SessionManagerController : ConfigurableController<Configuration>
 	{
 		private readonly List<Action> sessionCallbacks = new List<Action>();
 		private ConcurrentBag<Session> sessions = new ConcurrentBag<Session>();
@@ -30,7 +31,7 @@ namespace NFive.SessionManager
 
 		public Player CurrentHost { get; private set; }
 
-		public SessionController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration)
+		public SessionManagerController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration)
 		{
 			API.EnableEnhancedHostSupport(true);
 
@@ -230,7 +231,7 @@ namespace NFive.SessionManager
 			await this.Events.RaiseAsync(SessionEvents.ClientReconnected, client, session, oldSession);
 		}
 
-		public async void Dropped([FromSource] Player player, string disconnectMessage, CallbackDelegate drop)
+		public void Dropped([FromSource] Player player, string disconnectMessage, CallbackDelegate drop)
 		{
 			this.Logger.Debug("Dropped()");
 			this.Logger.Debug($"Player Dropped: {player.Name} | Reason: {disconnectMessage}");
