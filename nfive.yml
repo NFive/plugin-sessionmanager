@@ -1,0 +1,9 @@
+name: NFive/plugin-sessionmanager
+version: 0.6.0
+description: NFive session manager plugin
+author: NFive
+license: LGPL
+website: https://nfive.io/
+server:
+  main:
+    - NFive.SessionManager
