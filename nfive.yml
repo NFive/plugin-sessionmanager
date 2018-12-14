@@ -6,4 +6,6 @@ license: LGPL
 website: https://nfive.io/
 server:
   main:
-    - NFive.SessionManager
+    - NFive.SessionManager.Server
+  include:
+    - NFive.SessionManager.Shared
