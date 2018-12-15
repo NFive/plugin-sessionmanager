@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
+using System.Data.Entity.Validation;
 using System.Dynamic;
 using System.Linq;
 using System.Threading;
@@ -153,6 +154,7 @@ namespace NFive.SessionManager.Server
 						};
 
 						context.Users.Add(user);
+						await context.SaveChangesAsync();
 						await this.Events.RaiseAsync(SessionEvents.UserCreated, client, user);
 					}
 					else
@@ -177,6 +179,18 @@ namespace NFive.SessionManager.Server
 					// Save changes
 					await context.SaveChangesAsync();
 					transaction.Commit();
+				}
+				catch (DbEntityValidationException ex)
+				{
+					var errorMessages = ex.EntityValidationErrors
+						.SelectMany(x => x.ValidationErrors)
+						.Select(x => x.ErrorMessage);
+
+					var fullErrorMessage = string.Join("; ", errorMessages);
+
+					var exceptionMessage = string.Concat(ex.Message, " The Validation errors are: ", fullErrorMessage);
+					transaction.Rollback();
+					throw new DbEntityValidationException(exceptionMessage, ex.EntityValidationErrors);
 				}
 				catch (Exception ex)
 				{
