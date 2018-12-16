@@ -45,7 +45,7 @@ namespace NFive.SessionManager.Server
 
 			this.Rpc.Event(RpcEvents.ClientInitialize).On<string>(Initialize);
 			this.Rpc.Event(RpcEvents.ClientInitialized).On(Initialized);
-			this.Rpc.Event(SessionEvents.DisconnectPlayer);
+			this.Rpc.Event(SessionEvents.DisconnectPlayer).On<string>(Disconnect);
 
 			this.Events.OnRequest(SessionEvents.GetMaxPlayers, () => this.Configuration.MaxClients);
 			this.Events.OnRequest(SessionEvents.GetCurrentSessionsCount, () => this.sessions.Count);
@@ -252,6 +252,11 @@ namespace NFive.SessionManager.Server
 			var client = new Client(int.Parse(player.Handle));
 
 			this.Disconnecting(client, disconnectMessage);
+		}
+
+		public void Disconnect(IRpcEvent e, string reason)
+		{
+			API.DropPlayer(e.Client.Handle.ToString(), reason);
 		}
 
 		public async void Disconnecting(Client client, string disconnectMessage)
