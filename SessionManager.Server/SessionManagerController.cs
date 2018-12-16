@@ -60,7 +60,7 @@ namespace NFive.SessionManager.Server
 			{
 				lastActive = lastActive == default(DateTime) ? DateTime.UtcNow : lastActive;
 				var disconnectedSessions = context.Sessions.Where(s => s.Disconnected == null).ToList();
-				foreach (Session disconnectedSession in disconnectedSessions)
+				foreach (var disconnectedSession in disconnectedSessions)
 				{
 					disconnectedSession.Disconnected = lastActive;
 					disconnectedSession.DisconnectReason = "Session killed, disconnect time set to last server active time";
@@ -214,7 +214,7 @@ namespace NFive.SessionManager.Server
 
 			await this.Events.RaiseAsync(SessionEvents.SessionCreated, client, session, deferrals);
 
-			if (this.sessions.Any(s => s.User.Id == user.Id && s.Id != session.Id)) this.Reconnecting(client, session);
+			if (this.sessions.Any(s => s.User.Id == user.Id && s.Id != session.Id)) Reconnecting(client, session);
 
 			await this.Events.RaiseAsync(SessionEvents.ClientConnected, client, session);
 			this.Logger.Info($"[{session.Id}] Player \"{user.Name}\" connected from {session.IpAddress}");
@@ -251,7 +251,7 @@ namespace NFive.SessionManager.Server
 			this.Logger.Debug($"Player Dropped: {player.Name} | Reason: {disconnectMessage}");
 			var client = new Client(int.Parse(player.Handle));
 
-			this.Disconnecting(client, disconnectMessage);
+			Disconnecting(client, disconnectMessage);
 		}
 
 		public void Disconnect(IRpcEvent e, string reason)
@@ -339,7 +339,7 @@ namespace NFive.SessionManager.Server
 				if (API.GetPlayerLastMsg(client.Handle.ToString()) <= this.Configuration.ConnectionTimeout) continue;
 				await this.Events.RaiseAsync("sessionTimedOut", client, session);
 				session.Disconnected = DateTime.UtcNow;
-				this.Disconnecting(client, "Session Timed Out");
+				Disconnecting(client, "Session Timed Out");
 			}
 
 			this.Logger.Debug("Starting reconnect grace checks");

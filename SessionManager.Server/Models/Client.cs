@@ -31,6 +31,6 @@ namespace NFive.SessionManager.Server.Models
 			this.Ping = player.Ping;
 		}
 
-		public IRpcTrigger Event(string @event) { throw new System.NotImplementedException(); }
+		public IRpcTrigger Event(string @event) { throw new System.NotImplementedException(); } // TODO
 	}
 }

@@ -14,7 +14,7 @@ namespace NFive.SessionManager.Server.Storage
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<User>().HasIndex(u => u.SteamId).IsUnique();
+			modelBuilder.Entity<User>().HasIndex(u => u.SteamId).IsUnique(); // TODO: Needed?
 		}
 	}
 }

@@ -1,11 +1,9 @@
 ﻿using System.Dynamic;
 using System.Linq;
 using CitizenFX.Core;
-using JetBrains.Annotations;
 
 namespace NFive.SessionManager.Server
 {
-	[PublicAPI]
 	public class Deferrals
 	{
 		public CallbackDelegate Defer;
