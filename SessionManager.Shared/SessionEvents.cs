@@ -3,6 +3,7 @@
 	public static class SessionEvents
 	{
 		public const string DisconnectPlayer = "nfive:sessionmanager:disconnectPlayer";
+
 		public const string ClientConnecting = "nfive:sessionmanager:clientConnecting";
 		public const string UserCreating = "nfive:sessionmanager:userCreating";
 		public const string UserCreated = "nfive:sessionmanager:userCreated";
@@ -15,10 +16,10 @@
 		public const string ClientDisconnected = "nfive:sessionmanager:clientDisconnected";
 		public const string ClientInitializing = "nfive:sessionmanager:clientInitializing";
 		public const string ClientInitialized = "nfive:sessionmanager:clientInitialized";
+		public const string SessionTimedOut = "nfive:sessionmanager:sessionTimedOut";
 
 		public const string GetMaxPlayers = "nfive:sessionmanager:getMaxPlayers";
 		public const string GetCurrentSessionsCount = "nfive:sessionmanager:getCurrentSessionsCount";
 		public const string GetCurrentSessions = "nfive:sessionmanager:getCurrentSessions";
-
 	}
 }

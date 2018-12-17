@@ -247,7 +247,6 @@ namespace NFive.SessionManager.Server
 
 		public void Dropped([FromSource] Player player, string disconnectMessage, CallbackDelegate drop)
 		{
-			this.Logger.Debug("Dropped()");
 			this.Logger.Debug($"Player Dropped: {player.Name} | Reason: {disconnectMessage}");
 			var client = new Client(int.Parse(player.Handle));
 
@@ -337,7 +336,7 @@ namespace NFive.SessionManager.Server
 			{
 				await BaseScript.Delay(100);
 				if (API.GetPlayerLastMsg(client.Handle.ToString()) <= this.Configuration.ConnectionTimeout) continue;
-				await this.Events.RaiseAsync("sessionTimedOut", client, session);
+				await this.Events.RaiseAsync(SessionEvents.SessionTimedOut, client, session);
 				session.Disconnected = DateTime.UtcNow;
 				Disconnecting(client, "Session Timed Out");
 			}
