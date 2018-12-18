@@ -85,6 +85,12 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="Deferrals.cs" />
+    <Compile Include="Events\ClientDeferralsEventArgs.cs" />
+    <Compile Include="Events\ClientEventArgs.cs" />
+    <Compile Include="Events\ClientReconnectEventArgs.cs" />
+    <Compile Include="Events\ClientSessionDeferralsEventArgs.cs" />
+    <Compile Include="Events\ClientSessionEventArgs.cs" />
+    <Compile Include="Events\ClientUserEventArgs.cs" />
     <Compile Include="Migrations\201812082353575_Init.cs" />
     <Compile Include="Migrations\201812082353575_Init.Designer.cs">
       <DependentUpon>201812082353575_Init.cs</DependentUpon>
@@ -92,6 +98,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SessionManager.cs" />
     <Compile Include="SessionManagerController.cs" />
     <Compile Include="Storage\StorageContext.cs" />
   </ItemGroup>
