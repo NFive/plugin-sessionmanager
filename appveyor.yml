@@ -34,7 +34,7 @@ install:
 
     $version = $env:BUILD_VERSION -split '-'
 
-    $env:BUILD_VERSION_FRIENDLY = $version[0] -replace "(.0)$"
+    $env:BUILD_VERSION_FRIENDLY = $version[0] -replace "(\.0)$"
 
     If ($version[1]) {
       $env:BUILD_VERSION_FILE = "$($version[0]).$env:APPVEYOR_BUILD_NUMBER-$($version[1])"
