@@ -16,6 +16,7 @@ using NFive.SDK.Core.Models.Player;
 using NFive.SDK.Core.Rpc;
 using NFive.SDK.Server.Controllers;
 using NFive.SDK.Server.Events;
+using NFive.SDK.Server.Rcon;
 using NFive.SDK.Server.Rpc;
 using NFive.SessionManager.Server.Models;
 using NFive.SessionManager.Server.Storage;
@@ -32,7 +33,7 @@ namespace NFive.SessionManager.Server
 
 		public Player CurrentHost { get; private set; }
 
-		public SessionManagerController(ILogger logger, IEventManager events, IRpcHandler rpc, Configuration configuration) : base(logger, events, rpc, configuration)
+		public SessionManagerController(ILogger logger, IEventManager events, IRpcHandler rpc, IRconManager rcon, Configuration configuration) : base(logger, events, rpc, rcon, configuration)
 		{
 			API.EnableEnhancedHostSupport(true);
 
