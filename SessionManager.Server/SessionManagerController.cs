@@ -29,7 +29,7 @@ namespace NFive.SessionManager.Server
 	{
 		private readonly List<Action> sessionCallbacks = new List<Action>();
 		private ConcurrentBag<Session> sessions = new ConcurrentBag<Session>();
-		private Dictionary<Session, Tuple<Task, CancellationTokenSource>> threads = new Dictionary<Session, Tuple<Task, CancellationTokenSource>>();
+		private readonly Dictionary<Session, Tuple<Task, CancellationTokenSource>> threads = new Dictionary<Session, Tuple<Task, CancellationTokenSource>>();
 
 		public Player CurrentHost { get; private set; }
 
