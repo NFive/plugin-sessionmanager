@@ -1,6 +1,8 @@
-﻿using System.Globalization;
-using CitizenFX.Core;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using NFive.SDK.Server.Rpc;
+using System;
+using System.Globalization;
 
 namespace NFive.SessionManager.Server.Models
 {
@@ -16,7 +18,14 @@ namespace NFive.SessionManager.Server.Models
 
 		public string EndPoint { get; }
 
-		public int Ping { get; }
+		public int Ping
+		{
+			get
+			{
+				if (this.Handle > ushort.MaxValue) return -1;
+				return API.GetPlayerPing(this.Handle.ToString());
+			}
+		}
 
 		public Client(int handle)
 		{
@@ -28,9 +37,8 @@ namespace NFive.SessionManager.Server.Models
 			this.License = player.Identifiers["license"];
 			this.SteamId = !string.IsNullOrEmpty(player.Identifiers["steam"]) ? long.Parse(player.Identifiers["steam"], NumberStyles.HexNumber) : default(long?);
 			this.EndPoint = player.EndPoint;
-			this.Ping = player.Ping;
 		}
 
-		public IRpcTrigger Event(string @event) { throw new System.NotImplementedException(); } // TODO
+		public IRpcTrigger Event(string @event) { throw new NotImplementedException(); } // TODO
 	}
 }
